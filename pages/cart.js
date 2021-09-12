@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
-import dynamic from 'next/dynamic';
-import Layout from '../components/Layout';
-import { Store } from '../utils/Store';
-import NextLink from 'next/link';
-import Image from 'next/image';
+import React, { useContext } from "react";
+import dynamic from "next/dynamic";
+import Layout from "../components/Layout";
+import { Store } from "../utils/Store";
+import NextLink from "next/link";
+import Image from "next/image";
 import {
   Grid,
   TableContainer,
@@ -20,24 +20,30 @@ import {
   Card,
   List,
   ListItem,
-} from '@material-ui/core';
-import axios from 'axios';
+} from "@material-ui/core";
+import axios from "axios";
+import { useRouter } from "next/router";
 
 function CartScreen() {
+  const router = useRouter();
   const { state, dispatch } = useContext(Store);
   const {
     cart: { cartItems },
   } = state;
   const updateCartHandler = async (item, quantity) => {
     const { data } = await axios.get(`/api/products/${item._id}`);
+
     if (data.countInStock < quantity) {
-      window.alert('Sorry. Product is out of stock');
+      window.alert("Sorry. Product is out of stock");
       return;
     }
-    dispatch({ type: 'CART_ADD_ITEM', payload: { ...item, quantity } });
+    dispatch({ type: "CART_ADD_ITEM", payload: { ...item, quantity } });
   };
   const removeItemHandler = (item) => {
-    dispatch({ type: 'CART_REMOVE_ITEM', payload: item });
+    dispatch({ type: "CART_REMOVE_ITEM", payload: item });
+  };
+  const checkoutHandler = () => {
+    router.push("/shipping ");
   };
   return (
     <Layout title="Shopping Cart">
@@ -46,7 +52,7 @@ function CartScreen() {
       </Typography>
       {cartItems.length === 0 ? (
         <div>
-          Cart is empty.{' '}
+          Cart is empty.{" "}
           <NextLink href="/" passHref>
             <Link>Go shopping</Link>
           </NextLink>
@@ -123,13 +129,18 @@ function CartScreen() {
               <List>
                 <ListItem>
                   <Typography variant="h2">
-                    Subtotal ({cartItems.reduce((a, c) => a + c.quantity, 0)}{' '}
+                    Subtotal ({cartItems.reduce((a, c) => a + c.quantity, 0)}{" "}
                     items) : $
                     {cartItems.reduce((a, c) => a + c.quantity * c.price, 0)}
                   </Typography>
                 </ListItem>
                 <ListItem>
-                  <Button variant="contained" color="primary" fullWidth>
+                  <Button
+                    onClick={checkoutHandler}
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                  >
                     Check Out
                   </Button>
                 </ListItem>
