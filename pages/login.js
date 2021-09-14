@@ -10,14 +10,26 @@ import Layout from "../components/Layout";
 import useStyles from "../utils/styles";
 import NextLink from "next/link";
 import axios from "axios";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Store } from "../utils/Store";
-const Login = () => {
+import { useRouter } from "next/router";
+import Cookies from "js-cookie";
+
+export default function Login() {
+  const router = useRouter();
+  const { redirect } = router.query; // login?redirect=/shipping
+  const { state, dispatch } = useContext(Store);
+  const { userInfo } = state;
+
+  useEffect(() => {
+    if (userInfo) {
+      router.push("/");
+    }
+  }, []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { dispatch } = useContext(Store);
   const classes = useStyles();
-
   const submitHandler = async (e) => {
     e.preventDefault();
     try {
@@ -25,11 +37,9 @@ const Login = () => {
         email,
         password,
       });
-      dispatch({
-        type: "USER_LOGIN",
-        payload: data,
-      });
-      alert("succss login");
+      dispatch({ type: "USER_LOGIN", payload: data });
+      Cookies.set("userInfo", data);
+      router.push(redirect || "/");
     } catch (err) {
       alert(err.response.data ? err.response.data.message : err.message);
     }
@@ -76,6 +86,4 @@ const Login = () => {
       </form>
     </Layout>
   );
-};
-
-export default Login;
+}
